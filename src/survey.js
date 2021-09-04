@@ -17,11 +17,12 @@ import ReactDOM from 'react-dom';
 import LoadingGif from "./Assets/Images/animated.gif"
 import { FaWindowClose } from "react-icons/fa";
 import { AiOutlineArrowsAlt,AiOutlineShrink } from "react-icons/ai";
-
+import moment from 'moment'
 import { facesAnswerType,YesorNoAnswerTpes,thumbsAnswerTpes, HeartsAnswersTypes, LikertAnswerTypes, StarsAnswersTypes } from './helper/AnswersType';
 import './style.css';
 import './Responsive.css';
 import TakeSurvey from './Components/TakeSurvey';
+
 
 class Survey extends React.Component{
     state = {
@@ -32,6 +33,8 @@ class Survey extends React.Component{
         surveyLength: 0,
         surveyNumber: 0,
         startTime: '',
+    timeEqualSurveys: [],
+
         survey: null,
         config: {},
         uuid: '',
@@ -56,7 +59,7 @@ class Survey extends React.Component{
 
 componentDidMount=()=>{
     this.apiCall()
-    this.getDevice()
+    // this.getDevice()
   
 }
 
@@ -134,61 +137,61 @@ axios(config)
 
     
 
-    apiCall = async () => {
-        this.setState({
-          responses: [],
-          data: [],
-          multiple: [],
-          index: 0,
-          highValue: null,
-          surveyLength: 0,
-          surveyNumber: 0,
-          startTime: '',
-          survey: null,
-          uuid: null,
-          timeEqualSurveys: [],
-          facesAnswer: null,
-          visible: false,
-        });
-    this.setState({loading:true})
- 
-          console.log('efe4adfa-566a-4bd6-a952-78344aff1f21');
-          this.setState({loading: true});
+
+apiCall = async () => {
+  this.setState({
+    responses: [],
+    data: [],
+    multiple: [],
+    index: 0,
+    highValue: null,
+    surveyLength: 0,
+    surveyNumber: 0,
+    startTime: '',
+    survey: null,
+    uuid: null,
+    timeEqualSurveys: [],
+    facesAnswer: null,
+    visible: false,
+  });
+this.setState({loading:true})
+
+    console.log('efe4adfa-566a-4bd6-a952-78344aff1f21');
+    this.setState({loading: true});
+    var config = {
+      method: 'get',
+      url: this.props.link,
+      headers: { }
+    };
+    
+    axios(config)
+   
+   
+
+
+    
+
+      .then((response) => {
+        
+          console.log('Survey', response.data.data.survey.questions);
+          this.setState({survey: response.data.data.survey});
+       
+
+          let survey = response.data.data.survey.questions;
+          this.setState({data: survey, surveyLength: survey.length});
+
          
-          var myHeaders = new Headers();
-         
+        })
+        .then((result) => {
+          this.setState({
+            progress: 1 / this.state.data.length,
+            loading : false
 
-          myHeaders.append("Authorization", `Bearer ${this.props.bearer}`);
-          
-          var requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow'
-          };
-          
-          fetch(`https://services.censuble.com/api/v1/survey/${this.props.survey_uuid}`, requestOptions)
-            .then(response => response.text())
-            .then((result) => {
-                this.setState({loading: false});
-                let response = JSON.parse(result);
-                console.log('Survey', response.data.survey.questions);
-                this.setState({survey: response.data.survey});
-             
+          });
+        })
+      .catch(error => console.log('error', error));              
+};
 
-                let survey = response.data.survey.questions;
-                this.setState({data: survey, surveyLength: survey.length});
-
-               
-              })
-              .then((result) => {
-                this.setState({
-                  progress: 1 / this.state.data.length,
-                  loading : false
-
-                });
-              })
-            .catch(error => console.log('error', error));              
-      };
 
    
       
@@ -472,7 +475,7 @@ axios(config)
                 <p className="censuable-tab">Powered by <a href="https://www.censuble.com/" target="_blank">Censuble</a></p>
                 {/* {minimize ? <AiOutlineArrowsAlt className="icon-expand" onClick = {()=>this.setState({minimize:!this.state.minimize})}/> : <AiOutlineShrink className = "icon-expand" onClick = {()=>this.setState({minimize:!this.state.minimize})}/>} */}
                 <FaWindowClose className="icon-close" onClick = {this.props.close}/>
-                {this.state.loading ? <img className="loading-icon" src ={LoadingGif}/> :        
+                {this.state.loading ? <img className="loading-icon" src ={"https://playground.censubledev.com/Images/animated.gif"}/> :        
           
           <>
                 {this.state.surveyVisible ? 

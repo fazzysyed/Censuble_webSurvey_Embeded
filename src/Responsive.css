@@ -2134,3 +2134,12 @@
     }
 
   }
+  @media only screen 
+  and (min-device-width: 2560px) 
+  and (max-device-width: 2560px)  {
+
+    .best-stars {
+        right: 317px !important;
+        top: 430px !important;
+    }
+}
