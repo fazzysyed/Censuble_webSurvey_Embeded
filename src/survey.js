@@ -56,10 +56,9 @@ class Survey extends React.Component{
         write: 'Write Something',
    
       };
-
 componentDidMount=()=>{
-    this.apiCall()
-    // this.getDevice()
+    // this.apiCall()
+    this.getDevice()
   
 }
 
@@ -69,11 +68,10 @@ feedbackText = () => {
   const {feedback_text} = this.state;
   if(feedback_text.length){
   var myHeaders = new Headers();
-  myHeaders.append('Authorization', `Bearer ${this.props.bearer}`);
+
 
   let formdata = new FormData();
-  formdata.append('survey_uuid', this.state.survey.uuid,);
-  formdata.append('user_key', this.props.userKey);
+  formdata.append('survey_uuid', this.state.survey.uuid);
   formdata.append('feedback_topic', 'general');
   formdata.append('answer_id', '0');
   formdata.append('answer_type', 'feedback');
@@ -88,7 +86,7 @@ feedbackText = () => {
     redirect: 'follow',
   };
 
-  fetch('https://services.censuble.com/api/v1/feedback', requestOptions)
+  fetch('https://services.censuble.com/api/v1/web-feedback', requestOptions)
     .then((response) => response.text())
     .then((result) => {
       console.log(JSON.parse(result), 'fafafaf');
@@ -113,21 +111,114 @@ feedbackText = () => {
 }
 
 
+
 getDevice =()=>{
-  var axios = require('axios');
+  this.setState({
+    responses: [],
+    data: [],
+    multiple: [],
+    index: 0,
+    highValue: null,
+    surveyLength: 0,
+    surveyNumber: 0,
+    startTime: '',
+    survey: null,
+    uuid: null,
+    timeEqualSurveys: [],
+    facesAnswer: null,
+    visible: false,
+  });
+this.setState({loading:true})
+  
 
-var config = {
-  method: 'get',
-  url: `https://services.censuble.com/api/v1/device/${this.props.device_uuid}`,
-  headers: { 
-    'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL3NlcnZpY2VzLmNlbnN1YmxlLmNvbS9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTYyMTAxNjAyOCwiZXhwIjoxNjUyNTUyMDI4LCJuYmYiOjE2MjEwMTYwMjgsImp0aSI6IkZrZzBmUDJNNk9NTGhzZ08iLCJzdWIiOjQsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.EfEefjykkY3_a9h0YpLKKGJi3lI2zoVFsvYo0kwQ1evzGAiYD3YZsu5JQpegNf646ebmCJxU12kCOK-0Ik_e2B_b2hYbvAfXKZnpOUGBrB3eXK34lc_SqLU0j6cqLjtb_EbQZrk33OfizTvv81CJbPX2ZpdMlMoghcXpYlC_gJfA9yMk3zff6w0me4qY0rpCKAdLlVzpXZ8aD7Ucg5vcgLAf96nO11B023FD4nj-KlaROM2Xc6plJ8WEPIiy6xvqYzlh20Y7uoTtTUqw2-tSE-Dqxq3B4jS_5bIH1qEqt4URvdI5LJaOzVptDzf0vdD2RPhjkixEYR0UNucdKG8lJ0_xH-bKQGL6ITCRMpmbZVPixoe74w0dhk9AotrNa5B_lm4BYMEwhPpMjL21QebzRToCQq4tnuc8w94DbCSIAGYVfifNAOEBc-bBMMeOqTM_etXD7do6lQHuoHhNWoDrHGN1L_KiMJFENVeewezntyLOGENUqD7uIcqgrIkC9a20CF5n3nxM13M4ZV0hxGxgJLp5LNYxMy0Jugriajn_NWUqVSmEucmU-2jNxlurlzg9YZsV2K4V0lmwVCPQMjm0-f-o7d9kL4l1HLS-E0T7gu4n6hahYIlQyy6lPqv0BQjtn40GnjDo4Gx7cLk5yLTtOwsBKEQteOWnIisHP8t4cMM'
-  }
-};
 
+  var config = {
+    method: 'get',
+    url: `https://services.censuble.com/api/v1/device-surveys/${this.props.deviceToken}`,
+    headers: { }
+  };
+  
+  // var config = {
+  //   method: 'get',
+  //   url: 'https://services.censuble.com/api/v1/device/JRJR-JRJ-RLC',
+  //   headers: { 
+  //     'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL3NlcnZpY2VzLmNlbnN1YmxlLmNvbS9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTYyMTAxNjAyOCwiZXhwIjoxNjUyNTUyMDI4LCJuYmYiOjE2MjEwMTYwMjgsImp0aSI6IkZrZzBmUDJNNk9NTGhzZ08iLCJzdWIiOjQsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.EfEefjykkY3_a9h0YpLKKGJi3lI2zoVFsvYo0kwQ1evzGAiYD3YZsu5JQpegNf646ebmCJxU12kCOK-0Ik_e2B_b2hYbvAfXKZnpOUGBrB3eXK34lc_SqLU0j6cqLjtb_EbQZrk33OfizTvv81CJbPX2ZpdMlMoghcXpYlC_gJfA9yMk3zff6w0me4qY0rpCKAdLlVzpXZ8aD7Ucg5vcgLAf96nO11B023FD4nj-KlaROM2Xc6plJ8WEPIiy6xvqYzlh20Y7uoTtTUqw2-tSE-Dqxq3B4jS_5bIH1qEqt4URvdI5LJaOzVptDzf0vdD2RPhjkixEYR0UNucdKG8lJ0_xH-bKQGL6ITCRMpmbZVPixoe74w0dhk9AotrNa5B_lm4BYMEwhPpMjL21QebzRToCQq4tnuc8w94DbCSIAGYVfifNAOEBc-bBMMeOqTM_etXD7do6lQHuoHhNWoDrHGN1L_KiMJFENVeewezntyLOGENUqD7uIcqgrIkC9a20CF5n3nxM13M4ZV0hxGxgJLp5LNYxMy0Jugriajn_NWUqVSmEucmU-2jNxlurlzg9YZsV2K4V0lmwVCPQMjm0-f-o7d9kL4l1HLS-E0T7gu4n6hahYIlQyy6lPqv0BQjtn40GnjDo4Gx7cLk5yLTtOwsBKEQteOWnIisHP8t4cMM'
+  //   }
+  // };
+  
+  
 axios(config)
 .then( (response)=> {
   this.setState({config:response.data.data.device})
   console.log(response.data.data.device,"Hellofafa");
+  response.data.data.device.survey_list.map((el) => {
+    console.log(el, 'Survey List');
+  
+    var hours = new Date().getHours(); //To get the Current Hours
+    var min = new Date().getMinutes(); //To get the Current Minutes
+    var sec = new Date().getSeconds(); //To get the Current Seconds
+    this.setState({ startTime: `${hours}${min}${sec}` });
+    let currentTime = moment(`${hours}:${min}:${sec}`, 'hh:mm');
+  
+    var days = [0, 1, 2, 3, 4, 5, 6];
+    var dayName = days[new Date().getDay()];
+    console.log(dayName, 'DAyName');
+    // this.getCompanyName();
+    for (let item of el.schedules) {
+      let starttime = moment(item.time_start, 'hh:mm');
+      let endtime = moment(item.time_end, 'hh:mm');
+  
+      if (
+        currentTime.isBefore(endtime) &&
+        currentTime.isAfter(starttime) &&
+        item.day === dayName
+      ) {
+        this.state.timeEqualSurveys.push({ surveyuid: el.uuid });
+      }
+    }
+  });
+  
+}).then(()=>{
+
+
+
+
+
+const { timeEqualSurveys } = this.state;
+
+let survey =
+  timeEqualSurveys[
+  Math.floor(Math.random() * timeEqualSurveys.length)
+  ];
+  console.log(this.state.config.uuid,"ID" ,survey.surveyuid)
+
+  let configs = {
+    method: 'get',
+    url: `https://services.censuble.com/api/v1/web-survey/${this.state.config.company_uuid}/${survey.surveyuid}`,
+    headers: { }
+  };
+  
+ axios(configs)
+  .then((response) => {
+
+    console.log('Survey', response.data.data.survey.questions);
+    this.setState({ survey: response.data.data.survey });
+ 
+
+    let survey = response.data.data.survey.questions;
+    console.log(survey, "GGGGGGGGGGGGGGG")
+
+    this.setState({ data: survey, surveyLength: survey.length });
+
+ 
+  })
+  .then((result) => {
+    this.setState({
+      progress: 1 / this.state.data.length,
+      loading:false
+    });
+  });
+
 })
 .catch(function (error) {
   console.log(error);
@@ -195,112 +286,116 @@ this.setState({loading:true})
 
    
       
-      uploadResponse = async () => {
-        this.setState({data: []});
-    
-        const {config, data, companyName} = this.state;
-       
-        let responses = [];
-        data.map((value) => {
-          console.log(value, 'Hfdahjfhajfh Id');
-          if (value.answerWithId.length) {
-            for (let item of value.answerWithId) {
-              responses.push({
-                survey_uuid: this.state.survey.uuid,
-                survey_name: this.state.survey.name,
-                survey_category: '0',
-                question_id: value.question_id,
-                answer_text: item.answer,
-                answer_id: item.answer_id,
-    
-                parent_question_id: value.parent_question_id
-                  ? value.parent_question_id
-                  : 0,
-                question_text: value.question_text,
-                question_type: value.answer_type,
-                timestamp: Math.ceil(new Date().getTime() / 1000),
-                user_uuid: this.props.user_uuid,
-                transaction_id: this.uuid(),
-                testmode: false,
-    
-                category_id: '0',
-                category_name: 'kiosk',
-                media: {
-                  type: 'video',
-                  source: 'url',
-                  viewed: 'true',
-                },
-              });
-            }
-          } else {
-            responses.push({
-              survey_uuid: this.state.survey.uuid,
-              survey_name: this.state.survey.name,
-              survey_category: '0',
-              question_id: value.question_id,
-              answer_text: value.answerWithId.answer,
-              answer_id: value.answerWithId.id,
-    
-              parent_question_id: value.parent_question_id
-                ? value.parent_question_id
-                : 0,
-              question_text: value.question_text,
-              question_type: value.answer_type,
-              timestamp: Math.ceil(new Date().getTime() / 1000),
-              user_uuid: this.props.user_uuid,
-              transaction_id: this.uuid(),
-              testmode: false,
-              category_id: '0',
-              category_name: 'kiosk',
-              media: {
-                type: 'video',
-                source: 'url',
-                viewed: 'true',
-              },
-            });
-          }
+uploadResponse = async () => {
+  this.setState({data: []});
+  const {config, data, companyName} = this.state;
+
+  console.log(data,"Ready",this.state.survey)
+
+ 
+  let responses = [];
+  data.map((value) => {
+    console.log(value, 'Hfdahjfhajfh Id');
+    if (value.answerWithId.length) {
+      for (let item of value.answerWithId) {
+        responses.push({
+          survey_uuid: this.state.survey.uuid,
+          survey_name: this.state.survey.name,
+          survey_category: '0',
+          question_id: value.question_id,
+          answer_text: item.answer_text,
+          answer_id: item.master_id,
+
+          parent_question_id: value.parent_question_id
+            ? value.parent_question_id
+            : 0,
+          question_text: value.question_text,
+          question_type: value.answer_type,
+          timestamp: Math.ceil(new Date().getTime() / 1000),
+          user_uuid: 1,
+          transaction_id: this.uuid(),
+          testmode: false,
+
+          category_id: '0',
+          category_name: 'kiosk',
+          media: {
+            type: 'video',
+            source: 'url',
+            viewed: 'true',
+          },
         });
+      }
+    } else {
+      responses.push({
+        survey_uuid: this.state.survey.uuid,
+        survey_name: this.state.survey.name,
+        survey_category: '0',
+        question_id: value.question_id,
+        answer_text: value.answerWithId.answer_text,
+        answer_id: value.answerWithId.master_id,
+
+        parent_question_id: value.parent_question_id
+          ? value.parent_question_id
+          : 0,
+        question_text: value.question_text,
+        question_type: value.answer_type,
+        timestamp: Math.ceil(new Date().getTime() / 1000),
+        user_uuid: 1,
+        transaction_id: this.uuid(),
+        testmode: false,
+        category_id: '0',
+        category_name: 'kiosk',
+        media: {
+          type: 'video',
+          source: 'url',
+          viewed: 'true',
+        },
+      });
+    }
+  });
+  console.log(responses,"Ready")
+
+  let data2 = {
+    config: {
+      device_uuid: this.state.config.uuid,
+      device_name: this.state.config.company_name,
+      device_location: this.state.config.location_name,
+      company_name: this.state.config.company_name,
+      company_uuid: this.state.config.company_uuid,
+      timezone : this.state.config.company_timezone
+    },
+    responses: responses,
+    outage: {
+      records: responses.length,
+      start_timestamp: Math.ceil(new Date().getTime() / 1000),
+    },
+  };
+
+
+      var configuration = {
+        method: 'post',
+        url: 'https://services.censuble.com/api/v1/web-survey',
+        headers: {
     
-        let data2 = {
-          config: {
-            device_uuid: this.state.config.uuid,
-            device_name: this.state.config.name,
-            device_location: this.state.config.location_name,
-            company_name: this.state.config.company_name,
-            company_uuid: this.state.config.company_uuid,
-          },
-          responses: responses,
-          outage: {
-            records: responses.length,
-            start_timestamp: Math.ceil(new Date().getTime() / 1000),
-          },
-        };
-     
-    
-            var configuration = {
-              method: 'post',
-              url: 'https://services.censuble.com/api/v1/response',
-              headers: {
-                Authorization: `Bearer ${this.props.bearer}`,
-                'Content-Type': 'application/json',
-              },
-              data: data2,
-            };
-    
-            axios(configuration)
-              .then((response) => {
-                console.log(response.data, 'REsponse Api');
-              
-              })
-              .then(() => {
-              
-              })
-              .catch(function (error) {
-               
-              });
-          this.setState({surveyVisible:false})
-        
+          'Content-Type': 'application/json',
+        },
+        data: data2,
       };
+
+      axios(configuration)
+        .then((response) => {
+          console.log(response.data, 'REsponse Api');
+        
+        })
+        .then(() => {
+        
+        })
+        .catch(function (error) {
+         
+        });
+    this.setState({surveyVisible:false})
+  
+};
 
     
       next = (value, index) => {
@@ -472,9 +567,11 @@ this.setState({loading:true})
       <div className={minimize ? null : "survey-bg"}>
         
             <Box className={minimize ? "main-box-tab" : "main-box"} bgcolor="white" boxShadow="2" p="24px" mt="50px" width="100%">
+            <div style = {{display:"flex",flexDirection:"row",justifyContent:"space-between"}}>
                 <p className="censuable-tab">Powered by <a href="https://www.censuble.com/" target="_blank">Censuble</a></p>
                 {/* {minimize ? <AiOutlineArrowsAlt className="icon-expand" onClick = {()=>this.setState({minimize:!this.state.minimize})}/> : <AiOutlineShrink className = "icon-expand" onClick = {()=>this.setState({minimize:!this.state.minimize})}/>} */}
                 <FaWindowClose className="icon-close" onClick = {this.props.close}/>
+                </div>
                 {this.state.loading ? <img className="loading-icon" src ={"https://playground.censubledev.com/Images/animated.gif"}/> :        
           
           <>
